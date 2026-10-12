@@ -1,0 +1,23 @@
+# One command:  docker compose up --build      (UI: http://localhost:3000, API docs: http://localhost:8000/docs)
+services:
+  db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: lenny, POSTGRES_PASSWORD: lenny, POSTGRES_DB: lenny }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U lenny"], interval: 3s, timeout: 3s, retries: 20 }
+  backend:
+    build: ./backend
+    env_file: [.env]
+    environment:
+      DATABASE_URL: postgresql+psycopg://lenny:lenny@db:5432/lenny
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      TRANSCRIPTS_DIR: /app/data/transcripts
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: { db: { condition: service_healthy } }
+    volumes: [transcripts:/app/data]
+    ports: ["8000:8000"]
+  frontend:
+    build: ./frontend
+    depends_on: [backend]
+    ports: ["3000:80"]
+volumes: { pgdata: {}, transcripts: {} }

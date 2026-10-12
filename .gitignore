@@ -1,0 +1,15 @@
+.env
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+backend/data/
+.venv/
+
+lenny.db
+*.db
+backend/.env
+.env
+.venv/
+node_modules/
